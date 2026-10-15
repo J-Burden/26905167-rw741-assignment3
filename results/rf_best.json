@@ -1,0 +1,5 @@
+{
+ "max_features": 16,
+ "class_weight": "balanced",
+ "min_samples_leaf": 2
+}

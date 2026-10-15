@@ -1,0 +1,19 @@
+\begin{abstract}
+The classification of network traffic records into attack categories is a
+core task of intrusion detection. The study evaluated a random forest on a
+deduplicated version of the UNSW-NB15 dataset, and compared the forest with
+a bagged ensemble of trees, a classification tree and a $k$-nearest
+neighbours model. The forest was selected because the forest shares the base
+learner of the tree, so that the comparison isolates the effect of
+ensembling. Five research questions guided the tuning of the forest. All
+pre-processing was fitted within cross-validation folds on a development
+partition, and every model was evaluated once on a held-out generalisation
+set. The forest attained a macro-averaged $F_1$ measure of 0.607, against
+0.591 for the tree, 0.589 for bagging and 0.459 for the nearest neighbour
+model, and the improvement over the tree was statistically significant. The
+random feature subset produced the entire improvement, because bagging alone
+did not outperform the tree. The analysis further established that
+$7.1\,\%$ of the records share identical features with a record of a
+different category. The conflicts render two attack categories inseparable
+and mask most of the advantage of the forest on the separable records.
+\end{abstract}

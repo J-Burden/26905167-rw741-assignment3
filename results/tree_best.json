@@ -1,0 +1,7 @@
+{
+ "criterion": "entropy",
+ "max_depth": 16,
+ "min_samples_leaf": 1,
+ "class_weight": "balanced",
+ "ccp_alpha": 2e-05
+}

@@ -1,0 +1,47 @@
+\documentclass[conference,a4paper,10pt]{IEEEtran}
+% hyperref is deliberately not loaded: the document contains no hyperlinks.
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{url}
+\usepackage[caption=false,font=footnotesize]{subfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{siunitx}
+\sisetup{group-separator={,},group-minimum-digits=4,detect-all}
+\usepackage[acronym,nomain,nonumberlist,nopostdot]{glossaries}
+\graphicspath{{../figures/}}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+
+\makeglossaries
+\newacronym{ftp}{FTP}{file transfer protocol}
+\newacronym{ids}{IDS}{intrusion detection system}
+\newacronym{knn}{KNN}{$k$-nearest neighbours}
+\newacronym{rf}{RF}{random forest}
+
+\begin{document}
+
+\title{Random Forest Classification of\\Network Traffic Attack Categories}
+
+\author{\IEEEauthorblockN{Student number: 26905167}
+\IEEEauthorblockA{Stellenbosch University}}
+
+\maketitle
+\bstctlcite{bstctl}
+
+\input{abstract}
+
+\input{body_static}
+\input{body_empirical}
+\input{body_results}
+
+\bibliographystyle{IEEEtranS}
+\bibliography{refs}
+
+\appendices
+\input{appendix}
+
+\end{document}

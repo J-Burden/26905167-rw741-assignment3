@@ -1,0 +1,13 @@
+data/*.csv
+report/*.aux
+report/*.log
+report/*.bbl
+report/*.blg
+report/*.glo
+report/*.gls
+report/*.glg
+report/*.ist
+report/*.acn
+report/*.acr
+report/*.alg
+__pycache__/

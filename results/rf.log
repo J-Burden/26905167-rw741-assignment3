@@ -1,0 +1,49 @@
+rf_stageA.json {'max_features': 1, 'class_weight': None} 0.4845 +- 0.0057  32s
+rf_stageA.json {'max_features': 2, 'class_weight': None} 0.4944 +- 0.0109  38s
+rf_stageA.json {'max_features': 4, 'class_weight': None} 0.5249 +- 0.0093  52s
+rf_stageA.json {'max_features': 6, 'class_weight': None} 0.5332 +- 0.0083  66s
+rf_stageA.json {'max_features': 10, 'class_weight': None} 0.5545 +- 0.0080  96s
+rf_stageA.json {'max_features': 16, 'class_weight': None} 0.5620 +- 0.0052  143s
+rf_stageA.json {'max_features': 24, 'class_weight': None} 0.5696 +- 0.0039  206s
+rf_stageA.json {'max_features': 42, 'class_weight': None} 0.5676 +- 0.0052  359s
+rf_stageA.json {'max_features': 1, 'class_weight': 'balanced'} 0.5216 +- 0.0058  30s
+rf_stageA.json {'max_features': 2, 'class_weight': 'balanced'} 0.5417 +- 0.0092  33s
+rf_stageA.json {'max_features': 4, 'class_weight': 'balanced'} 0.5697 +- 0.0093  42s
+rf_stageA.json {'max_features': 6, 'class_weight': 'balanced'} 0.5845 +- 0.0104  51s
+rf_stageA.json {'max_features': 10, 'class_weight': 'balanced'} 0.5895 +- 0.0101  70s
+rf_stageA.json {'max_features': 16, 'class_weight': 'balanced'} 0.5906 +- 0.0086  99s
+rf_stageA.json {'max_features': 24, 'class_weight': 'balanced'} 0.5895 +- 0.0078  144s
+rf_stageA.json {'max_features': 42, 'class_weight': 'balanced'} 0.5769 +- 0.0094  234s
+rf_stageA.json {'max_features': 1, 'class_weight': 'balanced_subsample'} 0.4827 +- 0.0048  35s
+rf_stageA.json {'max_features': 2, 'class_weight': 'balanced_subsample'} 0.5023 +- 0.0066  40s
+rf_stageA.json {'max_features': 4, 'class_weight': 'balanced_subsample'} 0.5463 +- 0.0071  55s
+rf_stageA.json {'max_features': 6, 'class_weight': 'balanced_subsample'} 0.5595 +- 0.0077  70s
+rf_stageA.json {'max_features': 10, 'class_weight': 'balanced_subsample'} 0.5709 +- 0.0088  102s
+rf_stageA.json {'max_features': 16, 'class_weight': 'balanced_subsample'} 0.5795 +- 0.0104  153s
+rf_stageA.json {'max_features': 24, 'class_weight': 'balanced_subsample'} 0.5822 +- 0.0123  219s
+rf_stageA.json {'max_features': 42, 'class_weight': 'balanced_subsample'} 0.5770 +- 0.0110  369s
+stage A best {'max_features': 16, 'class_weight': 'balanced'} 0.5906
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 1} 0.5906 +- 0.0086  101s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 2} 0.5976 +- 0.0050  100s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 5} 0.5944 +- 0.0066  92s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 10} 0.5752 +- 0.0055  85s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 20} 0.5550 +- 0.0058  80s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 50} 0.5279 +- 0.0047  72s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 8} 0.4910 +- 0.0029  54s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 12} 0.5761 +- 0.0082  70s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 16} 0.5942 +- 0.0069  82s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 20} 0.5957 +- 0.0056  94s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 24} 0.5941 +- 0.0061  97s
+rf_stageB.json {'max_features': 16, 'class_weight': 'balanced', 'max_depth': 32} 0.5919 +- 0.0082  99s
+stage B best {'max_features': 16, 'class_weight': 'balanced', 'min_samples_leaf': 2} 0.5976
+curve fold 0 0.5992
+curve fold 1 0.6041
+curve fold 2 0.5913
+curve fold 3 0.5945
+curve fold 4 0.5948
+curve fold 0 0.5868
+curve fold 1 0.5937
+curve fold 2 0.5764
+curve fold 3 0.5786
+curve fold 4 0.5726
+ALLDONE

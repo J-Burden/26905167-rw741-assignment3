@@ -1,0 +1,179 @@
+%=====================================================================
+\section{Empirical process}
+\label{sec:empirical}
+
+The section describes the experimental procedure in sufficient detail for the
+reproduction of the reported results. The section first argues the choice
+of ensemble method, and then states the partitioning of the data, the resampling protocol, the tuning design of every model and
+the justification of every candidate value, the protocol of the final
+evaluation, and the statistical procedure used to compare the models.
+
+\subsection{Choice of ensemble method}
+\label{sec:choice}
+
+The comparison was designed to reflect the effect of ensembling rather than
+the effect of a different hypothesis space. The \gls{rf} uses the
+classification tree of the preceding study as the base learner, so a
+difference between the two models measures what aggregation and
+randomisation add to the same learner. A dissimilar ensemble would confound
+the two effects. The \gls{rf} is also a strong default for tabular data:
+Fern\'{a}ndez-Delgado \textit{et al.}~\cite{fernandez2014} evaluated 179
+classifiers on 121 datasets and found the \gls{rf} family to be the most
+accurate overall.
+
+Three properties of the data informed the choice among tree ensembles. The
+first property is the label conflict described in
+Section~\ref{sec:dataset}. From the perspective of any classifier, records
+with identical features and different categories are label noise. Boosting
+increases the weight of every misclassified instance, and would therefore
+concentrate on records that no model separates.
+Dietterich~\cite{dietterich2000b} showed that AdaBoost degraded markedly
+under class label noise, whereas bagging and randomised trees did not. The
+second property is the instability of the single tree under perturbation of
+the training data, which is the condition under which averaging over
+bootstrap samples succeeds~\cite{breiman1996}. The third property is the
+strong correlation between features reported in Section~\ref{sec:dataset}.
+Correlated features cause bagged trees to select similar splits, and the
+random feature subset of the \gls{rf} offers a direct control over the
+resulting correlation between trees, as expressed by
+Equation~(\ref{eq:bound}). Stacking was not considered, because stacking
+requires heterogeneous members, and the \gls{knn} model was both the weakest
+and the most expensive candidate member.
+
+\subsection{Partitioning and resampling}
+\label{sec:partition}
+
+The deduplicated dataset was partitioned once, by stratified random
+sampling, into a development partition of \num{130196} records
+($80\,\%$) and a generalisation set of \num{32549} records ($20\,\%$).
+Every tuning decision was based on the development partition alone.
+
+Within the development partition, every configuration was evaluated by
+stratified five-fold cross-validation. Stratification preserves the class
+proportions within every fold, which is necessary for a dataset in which an
+unstratified partition can omit a rare class~\cite{kohavi1995}. Five folds
+were preferred to ten folds for two reasons. The worms category comprises
+137 development records, which yields approximately 27 records per test
+fold at five folds but only 14 at ten folds, so that the per-fold recall of
+the category would rest on few instances. Every model was evaluated on the same five folds, so that every
+comparison during tuning was paired.
+
+The primary performance measure was $\bar{F}$ of
+Equation~(\ref{eq:macro}). The normal and generic categories jointly account
+for $57.3\,\%$ of the records, so a classifier that serves only the largest
+categories attains a high value of $\eta$ while failing at the purpose of
+an \gls{ids}. The measures $\bar{r}$ and $\eta$ were recorded in support. The
+configuration of greatest mean $\bar{F}$ over the five folds was selected
+at every tuning stage.
+
+\subsection{Tuning of the nearest neighbour model}
+\label{sec:tune-knn}
+
+The seven pre-processing variants of Section~\ref{sec:prep-knn} were each
+combined with nine values of $k$, drawn from
+$\{1, 3, 5, 7, 9, 11, 15, 21, 31\}$, and both weighting schemes, for a total
+of 126 configurations. Odd values of $k$ avoid tied votes between two
+classes. The values are dense around five, the optimum of the preceding
+study, and are spaced approximately geometrically above eleven, because the
+decision boundary changes progressively less per additional neighbour as
+$k$ grows.
+
+\subsection{Tuning of the classification tree}
+\label{sec:tune-tree}
+
+The tree was tuned in three stages. The first stage evaluated 72
+configurations, formed by the combination of both impurity measures, six
+depth limits drawn from $\{8, 12, 16, 20, 24, \infty\}$, three minimum leaf
+sizes drawn from $\{1, 5, 20\}$, and two weighting schemes, namely uniform
+weights and weights in inverse proportion to class frequency. The depth
+limits bracket the optimum of 16 found in the preceding study at a regular
+step of four, and the unlimited depth serves as the unpruned reference. The
+leaf sizes are spaced approximately geometrically, because the effect of a
+leaf size limit scales with the logarithm of the limit. The second stage
+applied eight values of $\alpha$ in Equation~(\ref{eq:ccp}), drawn from
+$\{0, 1, 2, 5, 10, 20, 50, 100\} \times 10^{-5}$, to the best configuration
+of the first stage. The values follow a one, two, five progression that
+brackets the optimum of $10^{-4}$ of the preceding study. The third stage
+evaluated the four encodings of Section~\ref{sec:prep-tree} under the best
+configuration of the second stage.
+
+\subsection{Tuning of the random forest}
+\label{sec:tune-rf}
+
+The forest was tuned in three stages, each of which addresses specific
+research questions of Section~\ref{sec:intro}. A joint search over every
+control parameter was computationally infeasible on the available hardware,
+so the stages form a coordinate-wise search.
+
+The first stage addressed the third and the fifth research questions. Eight
+values of $q$, drawn from $\{1, 2, 4, 6, 10, 16, 24, 42\}$, were combined with
+three weighting schemes: uniform weights, weights computed once from the
+training partition, and weights recomputed for every bootstrap sample. The
+values of $q$ span the full range from one feature per split, which
+randomises the choice of split feature completely, to all 42 features, which
+reduces the \gls{rf} to bagging. The spacing is approximately geometric, and
+the value of six corresponds to $\sqrt{p}$, the default recommended by
+Breiman~\cite{breiman2001} for classification. Trees were grown without depth
+or leaf size limits, following the convention of Section~\ref{sec:bg-rf}.
+Every configuration used 100 trees, and the strength and the pairwise
+agreement of the members were recorded.
+
+The second stage addressed the fourth research question. Under the best
+configuration of the first stage, six minimum leaf sizes drawn from
+$\{1, 2, 5, 10, 20, 50\}$ and six depth limits drawn from
+$\{8, 12, 16, 20, 24, 32\}$ were evaluated one at a time. The depth limits
+include the optimum of the single tree, so that the effect of the limit
+that the single tree required was observed directly. The mean $\bar{F}$ on
+the training partitions was recorded alongside the test partitions, so that
+the gap between the two quantified overfitting.
+
+The third stage addressed the second research question. For the best
+configuration of the second stage, and for the bagged equivalent with $q$
+equal to $p$, $\bar{F}$ was recorded for every value of $\tau$ from one to
+300. The number of trees for the final evaluation was fixed beforehand as
+the smallest value in $\{25, 50, 100, 150, 200, 250, 300\}$ whose mean
+$\bar{F}$ lies within 0.001 of the value at 300 trees. A final check
+compared the integer and indicator encodings under the selected
+configuration, with $q$ held at the same fraction of the available features.
+
+\subsection{Final evaluation}
+\label{sec:final-protocol}
+
+Four models were evaluated on the generalisation set: the \gls{knn} model,
+the classification tree, the bagged ensemble and the \gls{rf}. Every model
+was fitted to the full development partition under the selected
+configuration. The bagged ensemble shares every control parameter of the
+\gls{rf} except $q$, so the comparison of the two ensembles isolates the
+effect of random feature selection, and the comparison of the bagged
+ensemble with the tree isolates the effect of bootstrap aggregation.
+
+The tree-based models depend on a random seed, through bootstrap sampling,
+through the random feature subsets, and through the resolution of ties
+between splits of equal impurity reduction. Each tree-based model was
+therefore fitted under ten seeds, and the mean and the standard deviation
+over the seeds are reported. The \gls{knn} model is deterministic and was
+evaluated once. Training time, prediction time, per-class measures and the
+confusion matrix were recorded for every model.
+
+\subsection{Statistical comparison}
+\label{sec:stats-protocol}
+
+Five pairwise comparisons were planned: the \gls{rf} against each of the
+other three models, and the bagged ensemble against the tree. Each
+comparison was performed on the predictions of the models fitted under the
+first seed. The difference in $\bar{F}$ was assessed with \num{2000}
+paired bootstrap resamples of the generalisation set, and the difference in
+accuracy with the McNemar test of Equation~(\ref{eq:mcnemar}). The
+$p$-values of each test family were adjusted by the procedure of
+Holm~\cite{holm1979}, and a significance level of 0.05 was applied.
+
+\subsection{Irreducible error}
+\label{sec:ceiling-protocol}
+
+The records that share identical feature values with a record of a different
+category cannot all be classified correctly by any deterministic classifier.
+An empirical ceiling was computed by grouping the deduplicated records by
+their feature values and assigning to every group the most frequent
+category of the group. The ceiling is optimistic, because the assignment
+uses the labels that the assignment then scores, but the ceiling identifies
+the categories for which the features are insufficient.

@@ -1,0 +1,10 @@
+[Parallel(n_jobs=2)]: Using backend LokyBackend with 2 concurrent workers.
+[Parallel(n_jobs=2)]: Done  14 tasks      | elapsed:   59.8s
+[Parallel(n_jobs=2)]: Done  68 tasks      | elapsed:  6.9min
+[Parallel(n_jobs=2)]: Done  72 out of  72 | elapsed:  7.4min finished
+A best {'criterion': 'entropy', 'max_depth': 16, 'min_samples_leaf': 1, 'class_weight': 'balanced', 'enc': 'ordinal', 'collapse': False, 'macro_f1': np.float64(0.5810973642562629), 'macro_f1_std': np.float64(0.002138597149781611), 'bal_acc': np.float64(0.6499401531191972), 'accuracy': np.float64(0.7522811508248675), 'train_macro_f1': 0.7152438961220007, 'leaves': 3846.6, 'fold_macro_f1': [0.5814887880273684, 0.5851031295590617, 0.5792511106356092, 0.5797656277973091, 0.5798781652619667]} 445s
+B best alpha 2e-05 0.5816
+C ordinal False 0.5816
+C ordinal True 0.5797
+C onehot False 0.5894
+C onehot True 0.5822

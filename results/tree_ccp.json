@@ -1,0 +1,178 @@
+[
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 0.0,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5810973642562629,
+  "macro_f1_std": 0.002138597149781611,
+  "bal_acc": 0.6499401531191972,
+  "accuracy": 0.7522811508248675,
+  "train_macro_f1": 0.7152438961220007,
+  "leaves": 3846.6,
+  "fold_macro_f1": [
+   0.5814887880273684,
+   0.5851031295590617,
+   0.5792511106356092,
+   0.5797656277973091,
+   0.5798781652619667
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 1e-05,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5812676658152865,
+  "macro_f1_std": 0.0022159397840429153,
+  "bal_acc": 0.6505718590628591,
+  "accuracy": 0.7525038900941983,
+  "train_macro_f1": 0.7144382178994318,
+  "leaves": 3332.8,
+  "fold_macro_f1": [
+   0.5817944938096479,
+   0.5853850224777617,
+   0.5794750435012003,
+   0.5799877841857082,
+   0.5796959851021144
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 2e-05,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5815933755722374,
+  "macro_f1_std": 0.0019191343022999187,
+  "bal_acc": 0.6527077205784134,
+  "accuracy": 0.7523425897429409,
+  "train_macro_f1": 0.7113630967378446,
+  "leaves": 2878.0,
+  "fold_macro_f1": [
+   0.582850444623187,
+   0.5847485633019712,
+   0.580007089792846,
+   0.580610850010861,
+   0.5797499301323219
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 5e-05,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5807362559439042,
+  "macro_f1_std": 0.00233639840690594,
+  "bal_acc": 0.6578565333174501,
+  "accuracy": 0.7480567412499354,
+  "train_macro_f1": 0.6984724139657363,
+  "leaves": 2061.6,
+  "fold_macro_f1": [
+   0.5809157762960764,
+   0.5844879071988678,
+   0.5771330568542601,
+   0.5808459905443584,
+   0.5802985488259587
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 0.0001,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.58100741819182,
+  "macro_f1_std": 0.0029021623556482407,
+  "bal_acc": 0.6713319468669305,
+  "accuracy": 0.7378721068226326,
+  "train_macro_f1": 0.6720181059291868,
+  "leaves": 1338.0,
+  "fold_macro_f1": [
+   0.585750448129956,
+   0.5829642651168286,
+   0.5780338328065439,
+   0.5791782921397797,
+   0.5791102527659918
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 0.0002,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5792040598980372,
+  "macro_f1_std": 0.005325952899606871,
+  "bal_acc": 0.6931473915319677,
+  "accuracy": 0.7232326067793029,
+  "train_macro_f1": 0.6355377477990338,
+  "leaves": 672.4,
+  "fold_macro_f1": [
+   0.5876727405574816,
+   0.5786465894776015,
+   0.571789003424119,
+   0.5762455034202782,
+   0.5816664626107061
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 0.0005,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.571851841933533,
+  "macro_f1_std": 0.004467228990563578,
+  "bal_acc": 0.7142942747868245,
+  "accuracy": 0.7179406253965384,
+  "train_macro_f1": 0.5941822455834516,
+  "leaves": 271.0,
+  "fold_macro_f1": [
+   0.5752827882891522,
+   0.5725407841386263,
+   0.5651520470828488,
+   0.5687078673197595,
+   0.577575722837278
+  ]
+ },
+ {
+  "criterion": "entropy",
+  "max_depth": 16,
+  "min_samples_leaf": 1,
+  "class_weight": "balanced",
+  "ccp_alpha": 0.001,
+  "enc": "ordinal",
+  "collapse": false,
+  "macro_f1": 0.5543885388502006,
+  "macro_f1_std": 0.004361542605838095,
+  "bal_acc": 0.7122669991412038,
+  "accuracy": 0.7100371441537918,
+  "train_macro_f1": 0.5682629311969392,
+  "leaves": 158.6,
+  "fold_macro_f1": [
+   0.555739341583149,
+   0.5591702360614779,
+   0.555854107738438,
+   0.5461503177904816,
+   0.5550286910774563
+  ]
+ }
+]

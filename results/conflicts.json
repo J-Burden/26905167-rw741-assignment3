@@ -1,0 +1,55 @@
+{
+ "total_conflicting": 11506,
+ "per_class": {
+  "Normal": {
+   "n": 85722,
+   "conflicting": 414,
+   "pct": 0.5
+  },
+  "Reconnaissance": {
+   "n": 9991,
+   "conflicting": 1572,
+   "pct": 15.7
+  },
+  "Backdoor": {
+   "n": 1880,
+   "conflicting": 1530,
+   "pct": 81.4
+  },
+  "DoS": {
+   "n": 5500,
+   "conflicting": 1876,
+   "pct": 34.1
+  },
+  "Exploits": {
+   "n": 27434,
+   "conflicting": 1983,
+   "pct": 7.2
+  },
+  "Analysis": {
+   "n": 2032,
+   "conflicting": 1582,
+   "pct": 77.9
+  },
+  "Fuzzers": {
+   "n": 20960,
+   "conflicting": 2211,
+   "pct": 10.5
+  },
+  "Worms": {
+   "n": 171,
+   "conflicting": 12,
+   "pct": 7.0
+  },
+  "Shellcode": {
+   "n": 1456,
+   "conflicting": 10,
+   "pct": 0.7
+  },
+  "Generic": {
+   "n": 7599,
+   "conflicting": 316,
+   "pct": 4.2
+  }
+ }
+}

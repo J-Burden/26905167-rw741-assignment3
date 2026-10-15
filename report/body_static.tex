@@ -1,0 +1,488 @@
+%=====================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Network intrusion detection requires the assignment of individual traffic
+records to attack categories. Manual inspection does not scale to the volume
+of traffic carried by a modern network, so an \gls{ids} relies on automated
+classification of traffic records. Supervised learning provides the
+mechanism, in that a classifier learns the association between measured
+flow characteristics and known attack categories.
+
+A preceding study compared two single classifiers on an edited version of the
+UNSW-NB15 dataset, described by Moustafa and Slay~\cite{moustafa2015}. A
+classification tree outperformed \gls{knn} classification on every
+performance measure that accounts for class imbalance. The tree nevertheless
+detected the backdoor and analysis categories in fewer than half of the
+cases, and the variation of a single tree under perturbation of the training
+data remained unexamined. Single classification trees are known to be unstable,
+in the sense that small changes to the training set produce large changes to
+the induced tree~\cite{breiman1996}.
+
+The present study investigates ensemble learning as a remedy. A \gls{rf},
+introduced by Breiman~\cite{breiman2001}, was selected as the ensemble
+method, and was compared against revised implementations of the
+classification tree and the \gls{knn} model. The \gls{rf} shares the base
+learner of the classification tree. Any difference in performance between
+the two models is therefore attributable to the ensemble mechanism, rather
+than to a change of hypothesis space. A bagged ensemble of trees was
+evaluated as an intermediate model, so that the contribution of bootstrap
+aggregation was separated from the contribution of random feature selection.
+
+The tuning of the \gls{rf} was designed to answer five research questions,
+fixed before any forest was trained:
+\begin{enumerate}
+\item Does the \gls{rf} improve on the tuned classification tree, and on
+which attack categories does the improvement occur?
+\item How does performance change with the number of trees, and does the
+ensemble overfit as trees are added?
+\item How does the size of the random feature subset trade the strength of
+individual trees against the correlation between trees?
+\item Do the depth and leaf size limits required by the single tree remain
+beneficial inside an ensemble?
+\item Does instance weighting in inverse proportion to class frequency remain
+beneficial once predictions are averaged over many trees?
+\end{enumerate}
+
+The preceding study fitted selected pre-processing steps on the full
+dataset and retained no held-out data. The present study removes both
+limitations: every fitted transformation was learned inside the
+cross-validation folds, and every model was evaluated once on a
+generalisation set that played no part in any decision.
+
+The remainder of the report is organised as follows.
+Section~\ref{sec:background} presents the background on the three
+classification approaches, on ensemble learning, and on the evaluation of
+classifiers. Section~\ref{sec:data} describes the dataset and the
+pre-processing. Section~\ref{sec:impl} describes the implementation.
+Section~\ref{sec:empirical} describes the empirical process.
+Section~\ref{sec:results} presents and discusses the results, and
+Section~\ref{sec:conclusion} concludes the report.
+
+%=====================================================================
+\section{Background}
+\label{sec:background}
+
+The section provides the conceptual background required for the remainder of
+the report. The section first describes the two single classifiers of the
+preceding study, then presents ensemble learning in general and the
+\gls{rf} in particular, and finally describes the measures and statistical
+tests used to compare classifiers.
+
+\subsection{Nearest neighbour classification}
+\label{sec:bg-knn}
+
+The \gls{knn} algorithm, analysed by Cover and Hart~\cite{cover1967}, is an
+instance-based classifier. Training consists of the storage of the training
+set. Classification of an unseen instance proceeds by the retrieval of the
+$k$ stored instances closest to the unseen instance, followed by a vote among
+the retrieved instances. For two instances represented by the feature vectors
+$\mathbf{x}$ and $\mathbf{z}$ over $p$ features, the Euclidean distance is
+\begin{equation}
+\delta(\mathbf{x}, \mathbf{z}) = \sqrt{\sum_{j=1}^{p} (x_j - z_j)^2},
+\label{eq:euclid}
+\end{equation}
+where $x_j$ denotes the value of feature $j$ of instance $\mathbf{x}$.
+Equation~(\ref{eq:euclid}) sums squared differences of raw feature values,
+so a feature of large numeric range dominates the distance irrespective of
+the usefulness of the feature for discrimination. Feature scaling is
+therefore a prerequisite of the algorithm.
+
+Two control parameters govern the behaviour of the algorithm. A small value
+of $k$ produces a flexible decision boundary that is sensitive to noise,
+whereas a large value of $k$ smooths the boundary and biases prediction
+toward the majority class. Under uniform weighting each retrieved neighbour
+casts one vote. Under distance weighting each vote is scaled by the
+reciprocal of $\delta$, so that closer neighbours exert greater influence.
+Aggarwal \textit{et al.}~\cite{aggarwal2001} showed that the contrast
+between the nearest and the furthest neighbour diminishes as the number of
+dimensions grows, which penalises representations with many sparse
+features.
+
+\subsection{Classification trees}
+\label{sec:bg-tree}
+
+A classification tree, described by Breiman
+\textit{et al.}~\cite{breiman1984}, recursively partitions the feature space.
+Each internal node tests one feature against a threshold, and each leaf
+assigns a class label. Construction is greedy: at each node the algorithm
+selects the feature and threshold that maximise the reduction of an impurity
+measure. For a node at which $\pi_j$ denotes the proportion of instances of
+class $j$, and $c$ denotes the number of classes, the Gini index and the
+entropy are
+\begin{equation}
+G = 1 - \sum_{j=1}^{c} \pi_j^2
+\quad\text{and}\quad
+H = -\sum_{j=1}^{c} \pi_j \log_2 \pi_j.
+\label{eq:impurity}
+\end{equation}
+Entropy was employed by Quinlan~\cite{quinlan1986} as the split criterion of an early tree induction algorithm.
+
+A tree grown until every leaf is pure fits the training set exactly and
+generalises poorly. Pre-pruning limits growth through a maximum depth and a
+minimum number of instances per leaf. Post-pruning grows a full tree and then
+removes subtrees. Cost-complexity pruning~\cite{breiman1984} selects the
+subtree of the full tree $h$ that minimises
+\begin{equation}
+R_\alpha(h) = R(h) + \alpha |h|,
+\label{eq:ccp}
+\end{equation}
+where $R(h)$ denotes the weighted training misclassification cost of $h$,
+$|h|$ denotes the number of leaves of $h$, and $\alpha \geq 0$ denotes the
+complexity penalty. Every removed subtree is replaced by a single leaf that
+predicts the majority class of the training instances that reach the
+removed subtree. Increasing values of $\alpha$ therefore produce
+progressively smaller trees.
+
+Class imbalance is addressed through instance weights. Under weighting in
+inverse proportion to class frequency, an instance of class $j$ receives the
+weight $w_j = n / (c\,n_j)$, where $n$ denotes the number of training
+instances and $n_j$ denotes the number of training instances of class $j$.
+The weights enter the class proportions of Equation~(\ref{eq:impurity}), so
+that a split which isolates a rare class achieves a larger impurity
+reduction~\cite{he2009}.
+
+\subsection{Ensemble learning}
+\label{sec:bg-ensemble}
+
+An ensemble combines the predictions of several base classifiers into a
+single prediction. Dietterich~\cite{dietterich2000} identified three reasons
+for the success of ensembles. The statistical reason is that a finite
+training set supports many hypotheses of equal training accuracy, and an
+average over the hypotheses reduces the risk of the selection of a poor
+hypothesis. The computational reason is that greedy induction reaches a
+local optimum, and different starting conditions reach different optima. The
+representational reason is that a combination of hypotheses represents
+decision boundaries that no single member represents.
+
+The error of a learner decomposes into a bias term and a variance
+term~\cite{geman1992}. Fully grown trees have low bias and high variance,
+which makes the trees ideal members of an averaging ensemble: the average
+retains the low bias and reduces the variance. An average reduces variance
+only to the extent that the members disagree. Kuncheva and
+Whitaker~\cite{kuncheva2003} reviewed measures of disagreement between
+members, termed diversity, and examined the relationship between diversity
+and ensemble accuracy.
+
+Three families of ensemble methods dominate the literature. Bagging and
+random forests train members independently on perturbed versions of the
+training set and average the predictions. Boosting, of which AdaBoost by
+Freund and Schapire~\cite{freund1997} and gradient boosting by
+Friedman~\cite{friedman2001} are the best known instances, trains members
+sequentially, so that each member concentrates on the errors of the
+preceding members. Stacking, introduced by Wolpert~\cite{wolpert1992}, trains
+a second-level learner on the outputs of heterogeneous members.
+
+\subsection{Bagging}
+\label{sec:bg-bagging}
+
+Bagging, introduced by Breiman~\cite{breiman1996}, trains $\tau$ members on
+$\tau$ bootstrap samples of the training set. A bootstrap sample is drawn
+with replacement and has the size of the training set, so each sample omits
+approximately $36.8\,\%$ of the distinct training instances. The members
+vote, or average the class probabilities, to produce the prediction of the
+ensemble. Breiman~\cite{breiman1996} showed that bagging improves unstable
+learners, such as classification trees, and leaves stable learners, such as
+the \gls{knn} algorithm, largely unchanged.
+
+\subsection{Random forests}
+\label{sec:bg-rf}
+
+The \gls{rf}~\cite{breiman2001} extends bagging with a second source of
+randomisation. At every node of every tree, the best split is sought among a
+random subset of $q$ of the $p$ features, rather than among all features.
+The idea follows the random subspace method of Ho~\cite{ho1998}. A value of
+$q$ equal to $p$ reduces the \gls{rf} to bagging.
+
+Breiman~\cite{breiman2001} bounded the generalisation error $\epsilon$ of a
+forest by
+\begin{equation}
+\epsilon \leq \frac{\bar{\rho}\,(1 - s^2)}{s^2},
+\label{eq:bound}
+\end{equation}
+where $s$ denotes the strength of the individual trees, defined as the
+expected margin of a tree, and $\bar{\rho}$ denotes the mean correlation
+between trees. Equation~(\ref{eq:bound}) identifies $q$ as the central
+control parameter of the method. A small value of $q$ decorrelates the
+trees, which reduces $\bar{\rho}$, but also weakens each tree, which reduces
+$s$. The best value of $q$ balances the two effects and depends on the
+dataset~\cite{probst2019}.
+
+Breiman~\cite{breiman2001} additionally established, through the strong law
+of large numbers, that the generalisation error converges as $\tau$ grows. An
+increase of $\tau$ therefore cannot cause overfitting, and the choice of
+$\tau$ trades computational cost against the residual variance of the
+ensemble. Probst and Boulesteix~\cite{probst2018} showed that the performance
+curve over $\tau$ is not always monotone for measures other than the error
+rate, which motivates an empirical examination of the curve rather than an
+assumption.
+
+The trees of an \gls{rf} are conventionally grown to purity, because the
+average removes the variance that pruning would otherwise control. Probst
+\textit{et al.}~\cite{probst2019} reported that a limit on the leaf size
+occasionally improves performance, particularly on noisy data. Class
+weighting applies to the forest as to a single tree, either with weights
+computed once from the full training set or with weights recomputed for
+every bootstrap sample.
+
+The \gls{rf} also offers a measure of feature importance, computed as the
+total weighted impurity reduction attributable to each feature. Strobl
+\textit{et al.}~\cite{strobl2007} showed that the impurity-based measure
+favours features with many candidate split points. Permutation importance,
+defined as the reduction of a performance measure after the random
+permutation of the values of one feature in a held-out set, avoids the bias.
+
+\subsection{Performance measures}
+\label{sec:bg-measures}
+
+Let $\mathbf{C}$ denote the confusion matrix of a classifier on a test set,
+where the element $C_{jl}$ counts the instances of class $j$ predicted as
+class $l$. The precision $a_j$, the recall $r_j$ and the $F_1$ measure
+$F_j$ of class $j$ are
+\begin{equation}
+a_j = \frac{C_{jj}}{\sum_{l=1}^{c} C_{lj}}, \quad
+r_j = \frac{C_{jj}}{\sum_{l=1}^{c} C_{jl}}, \quad
+F_j = \frac{2\,a_j r_j}{a_j + r_j}.
+\label{eq:prf}
+\end{equation}
+The macro-averaged $F_1$ measure $\bar{F}$, the balanced accuracy $\bar{r}$
+and the accuracy $\eta$ are
+\begin{equation}
+\bar{F} = \frac{1}{c}\sum_{j=1}^{c} F_j, \quad
+\bar{r} = \frac{1}{c}\sum_{j=1}^{c} r_j, \quad
+\eta = \frac{\sum_{j=1}^{c} C_{jj}}{\sum_{j=1}^{c}\sum_{l=1}^{c} C_{jl}}.
+\label{eq:macro}
+\end{equation}
+The accuracy $\eta$ weights every instance equally, and is therefore
+dominated by the largest classes. The measures $\bar{F}$ and $\bar{r}$
+weight every class equally, which suits problems in which the detection of
+rare classes is the objective~\cite{sokolova2009}.
+
+\subsection{Statistical comparison of classifiers}
+\label{sec:bg-stats}
+
+Dietterich~\cite{dietterich1998} recommended the McNemar
+test~\cite{mcnemar1947} for the comparison of two classifiers evaluated on a
+single test set. Let $u$ denote the number of test instances classified
+correctly by the first classifier only, and $v$ the number classified
+correctly by the second classifier only. Under the null hypothesis of equal
+error rates, the statistic
+\begin{equation}
+\chi^2 = \frac{\left(|u - v| - 1\right)^2}{u + v}
+\label{eq:mcnemar}
+\end{equation}
+follows a chi-squared distribution with one degree of freedom. The McNemar
+test addresses accuracy only. A difference in $\bar{F}$ is instead assessed
+with the paired bootstrap~\cite{efron1993}: test instances are resampled
+with replacement, the difference in $\bar{F}$ between the two classifiers is
+recomputed on every resample, and the percentiles of the resulting
+distribution yield a confidence interval. When several pairwise tests are
+performed, the procedure of Holm~\cite{holm1979} adjusts the $p$-values so
+that the probability of one or more false rejections across the family
+remains below the significance level.
+
+%=====================================================================
+\section{Data and pre-processing}
+\label{sec:data}
+
+The section describes the dataset, the properties of the dataset that bear on
+the choice and configuration of the models, and the pre-processing applied
+to the input of each model. The section first reports the data quality
+analysis, then describes the corrections shared by all models, and finally
+describes the model-specific pre-processing candidates that were evaluated.
+
+\subsection{Dataset}
+\label{sec:dataset}
+
+The supplied file contains \num{257673} network flow records, each described
+by a record identifier, 42 descriptive features and a target feature. The
+target feature assigns every record to one of ten categories, namely normal
+traffic and nine attack categories. The descriptive features comprise three
+nominal features, namely the transaction protocol, the connection state and
+the application service, and 39 numeric features that describe packet counts,
+byte counts, timing, and connection statistics~\cite{moustafa2016}.
+
+The data quality analysis of the preceding study established eight defects.
+The record identifier is unique and ordered by category. The service feature
+contains \num{141321} missing values. The binary feature that indicates a
+\gls{ftp} login contains 26 values greater than one. Numeric ranges span nine
+orders of magnitude, 24 feature pairs correlate above 0.85, and the protocol
+feature has 133 levels. Finally, \num{94928} records, or $36.8\,\%$ of the
+file, are exact duplicates once the identifier is disregarded. After the
+removal of the duplicates, \num{162745} records remain, of which normal
+traffic accounts for $52.7\,\%$ and the worms category for $0.1\,\%$.
+
+The present study established a ninth property of the data, which the
+preceding study did not examine. After deduplication, \num{11506} records,
+or $7.1\,\%$ of the dataset, share identical values on all 42 descriptive
+features with at least one record of a different category. No classifier
+that receives only the 42 features distinguishes such records. The conflicts
+are concentrated in specific categories: $81.4\,\%$ of the backdoor records,
+$77.9\,\%$ of the analysis records and $34.1\,\%$ of the denial of service
+records belong to a group of identical feature vectors that spans several
+categories, against $0.5\,\%$ of the normal records and $0.7\,\%$ of the
+shellcode records. The largest such groups mix the reconnaissance,
+backdoor, denial of service, exploits, analysis and fuzzers categories.
+The property bounds the performance attainable on the affected categories,
+because a group of identical feature vectors receives a single prediction.
+
+\subsection{Corrections shared by all models}
+\label{sec:shared}
+
+Four corrections were applied identically to the input of every model. The
+record identifier was removed, because the identifier carries no
+generalisable information and the ordering of the file associates identifier
+ranges with categories. Missing service values were encoded as an additional
+level, because the absence of a notable application service is itself an
+observation~\cite{moustafa2015}. Values of the \gls{ftp} login indicator greater
+than one were clipped to one, because any such value records the occurrence
+of a login. Duplicate records were removed, because a duplicate placed in
+both a training partition and a test partition inflates the estimated
+performance.
+
+None of the four corrections learns from the data, so the corrections were
+applied once, before the partitioning of the data. Every remaining
+transformation learns a quantity from the data, such as a median, a level
+vocabulary or a correlation. Every such transformation was fitted on the
+training partition of each fold and then applied, unchanged, to the
+corresponding test partition.
+
+\subsection{Pre-processing candidates for nearest neighbour classification}
+\label{sec:prep-knn}
+
+The \gls{knn} input requires three decisions, and the preceding study left
+two of the decisions untested. The first decision is the scaling method.
+Four candidates were evaluated: standardisation to zero mean and unit
+variance, scaling by the median and the interquartile range, scaling to the
+range $[0, 1]$, and the absence of scaling. Interquartile scaling was
+expected to perform best, because the median and the interquartile range are
+insensitive to the extreme values present in the data.
+
+The second decision is the encoding of nominal features. Every level was
+encoded as a binary indicator feature, because an integer code imposes an
+artificial order that Equation~(\ref{eq:euclid}) would treat as a meaningful
+distance. The 133 protocol levels then produce 133 sparse indicators. Two
+candidates were evaluated: retention of every level, and the retention of
+the ten most frequent protocol levels and the five most frequent state levels
+with the remaining levels merged into a single level. The merge was expected
+to help modestly, through the mechanism described by Aggarwal
+\textit{et al.}~\cite{aggarwal2001}.
+
+The third decision concerns two optional transformations, namely a
+logarithmic transformation of non-negative features with a skewness above
+one, and the removal of one feature from every pair with an absolute
+correlation above 0.95. Each transformation was evaluated as an addition to
+the best configuration of the first two decisions. The preceding study
+found that both transformations degraded performance, but the finding rested
+on transformations fitted to the full dataset.
+
+\subsection{Pre-processing candidates for tree-based models}
+\label{sec:prep-tree}
+
+Scaling, logarithmic transformation and the removal of correlated features
+were not applied to the input of the classification tree or the tree
+ensembles. A threshold test depends only on the order of values within a
+feature, so a monotone transformation leaves every candidate split
+unchanged. A redundant feature yields no additional impurity reduction, so
+the tree removes redundancy implicitly.
+
+The encoding of nominal features does affect tree-based models, and two
+encodings were evaluated for each tree-based model. Integer encoding assigns
+one code per level, which keeps the number of features at 42 but forces the
+tree to isolate a level through several threshold tests. Indicator encoding
+allows a single test to isolate one level, at the cost of an increase to 193
+features. For the classification tree, both encodings were
+additionally evaluated with and without the merge of rare levels.
+
+%=====================================================================
+\section{Implementation}
+\label{sec:impl}
+
+The section describes the software, the implementation of each model, and the
+measures taken for reproducibility and computational tractability.
+
+\subsection{Software}
+
+The study was implemented in Python, version 3.13. Models, resampling,
+scaling and performance measures were provided by scikit-learn, version
+1.9~\cite{pedregosa2011}, through the classes
+\texttt{DecisionTreeClassifier}, \texttt{RandomForestClassifier},
+\texttt{NearestNeighbors}, \texttt{StratifiedKFold}, \texttt{RobustScaler},
+\texttt{StandardScaler} and \texttt{MinMaxScaler}. Data manipulation was
+performed with pandas, version 3.0, and numeric computation with NumPy,
+version 2.5. The source code is publicly
+available.\footnote{\url{https://github.com/J-Burden/26905167-rw741-assignment3}}
+
+The level merge and both encodings were implemented as transformer classes
+with separate fitting and application methods, so that the level vocabulary
+of each fold was learned from the training partition only.
+
+\subsection{Nearest neighbour search}
+
+The \gls{knn} model was implemented through exhaustive search rather than
+through a spatial index. A spatial index, such as a $k$-d tree, partitions the
+feature space to avoid the computation of every distance, but degenerates to
+exhaustive search in high-dimensional spaces, and the indicator encoding
+produces between 62 and 193 features. A tuning sweep over several values of
+$k$ and both weighting schemes requires only one search per fold, because
+the neighbours returned by an exhaustive search are ordered by distance. The
+list of the $k$ nearest neighbours is therefore a prefix of the list for
+any larger value of $k$. Algorithm~\ref{alg:reuse} states the procedure.
+
+\begin{algorithm}[!t]
+\caption{Neighbour reuse for a control parameter sweep}
+\label{alg:reuse}
+\begin{algorithmic}[1]
+\For{each fold}
+  \State Fit the pre-processing on the training partition
+  \State Apply the pre-processing to both partitions
+  \State Retrieve the largest candidate number of nearest training instances
+         of every test instance, in order of increasing distance
+  \For{each candidate value of $k$}
+    \State Restrict every retrieved list to the first $k$ entries
+    \State Predict the class of greatest vote count under uniform weighting
+    \State Predict the class of greatest total reciprocal distance under
+           distance weighting
+  \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+Where a neighbour lay at distance zero, every neighbour at distance zero
+received a weight of one and every other neighbour a weight of zero, which
+matches the convention of scikit-learn.
+
+\subsection{Tree-based models}
+
+The classification tree was implemented through
+\texttt{DecisionTreeClassifier}, which grows binary trees and supports both
+impurity measures of Equation~(\ref{eq:impurity}), class weighting, and the
+cost-complexity pruning of Equation~(\ref{eq:ccp}). The implementation
+requires numeric input without missing values, which the encodings of
+Section~\ref{sec:prep-tree} provide. The bagged ensemble and the \gls{rf}
+were implemented through \texttt{RandomForestClassifier}, with $q$ set to
+$p$ for bagging. The ensemble predicts the class of greatest mean class
+probability over the trees, rather than the class of greatest vote count.
+
+The examination of performance as a function of $\tau$ did not require a
+separate forest for every value of $\tau$. Each forest member is trained
+independently of the other members, so the first $t$ members of a forest of
+$\tau$ trees form a valid forest of $t$ trees. A single forest of 300 trees
+was therefore trained per fold. The class probabilities of the members were
+accumulated in order, and the prediction of the forest was recorded after
+the addition of every member.
+
+The diversity of every forest was measured on the test partition of each
+fold. The strength of the members was measured as the mean $\bar{F}$ of the
+individual trees. The correlation between members was measured as the mean
+pairwise agreement, defined as the proportion of instances for which two
+trees predict the same class~\cite{kuncheva2003}, over every pair among 25
+randomly selected trees.
+
+\subsection{Reproducibility and computational budget}
+
+Fixed seeds were supplied to the partitioning, to the folds, and to every
+tree and forest, so that every model was evaluated on identical partitions.
+The experiments were constrained to two processor cores, which limited the
+size of the tuning grids and motivated the use of 100 trees during the
+tuning of the \gls{rf}.

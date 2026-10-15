@@ -1,0 +1,42 @@
+robust_collapsed fold 0 8s
+robust_collapsed fold 1 16s
+robust_collapsed fold 2 23s
+robust_collapsed fold 3 32s
+robust_collapsed fold 4 40s
+BEST robust_collapsed 5 distance 0.4674
+standard_collapsed fold 0 8s
+standard_collapsed fold 1 16s
+standard_collapsed fold 2 23s
+standard_collapsed fold 3 31s
+standard_collapsed fold 4 38s
+BEST standard_collapsed 3 uniform 0.4173
+minmax_collapsed fold 0 8s
+minmax_collapsed fold 1 15s
+minmax_collapsed fold 2 23s
+minmax_collapsed fold 3 31s
+minmax_collapsed fold 4 39s
+BEST minmax_collapsed 5 uniform 0.4139
+none_collapsed fold 0 8s
+none_collapsed fold 1 16s
+none_collapsed fold 2 24s
+none_collapsed fold 3 32s
+none_collapsed fold 4 40s
+BEST none_collapsed 21 distance 0.2934
+robust_alllevels fold 0 17s
+robust_alllevels fold 1 34s
+robust_alllevels fold 2 49s
+robust_alllevels fold 3 65s
+robust_alllevels fold 4 80s
+BEST robust_alllevels 5 distance 0.4633
+robust_collapsed_log fold 0 8s
+robust_collapsed_log fold 1 17s
+robust_collapsed_log fold 2 25s
+robust_collapsed_log fold 3 33s
+robust_collapsed_log fold 4 42s
+BEST robust_collapsed_log 3 distance 0.4584
+robust_collapsed_corr fold 0 8s
+robust_collapsed_corr fold 1 15s
+robust_collapsed_corr fold 2 23s
+robust_collapsed_corr fold 3 31s
+robust_collapsed_corr fold 4 39s
+BEST robust_collapsed_corr 5 distance 0.4603
